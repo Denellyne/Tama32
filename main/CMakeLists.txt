@@ -1,2 +1,2 @@
-idf_component_register(SRCS "Tamagotchi.c"
+idf_component_register(SRCS "Tama32.c"
                     INCLUDE_DIRS ".")

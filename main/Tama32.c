@@ -1,5 +1,6 @@
 #include "Sprites/Pookiee/Pookiee.h"
 #include "Sprites/Sprites.h"
+#include "Tama/Tama.h"
 #include "u8g2_esp32_hal.h"
 #include <driver/gpio.h>
 #include <driver/spi_master.h>
@@ -7,17 +8,15 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <stdint.h>
-#include <string.h>
 #include <u8g2.h>
 
+// Pins
 // SDA - GPIO21
 #define PIN_SDA 21
-#define BLINK_LED 2
-
 // SCL - GPIO22
 #define PIN_SCL 22
 
-static const char *TAG = "Tamagotchi";
+static const char *TAG = "Tama32";
 
 u8g2_t *setup() {
 
@@ -38,46 +37,35 @@ u8g2_t *setup() {
   u8g2_InitDisplay(u8g2); // send init sequence to the display, display is in
                           // sleep mode after this,
 
-  ESP_LOGI(TAG, "u8g2_SetFont");
-  u8g2_SetFont(u8g2, u8g2_font_ncenB14_tr);
-  ESP_LOGI(TAG, "u8g2_SetPowerSave");
-  u8g2_SetPowerSave(u8g2, 0); // wake up display
+  // ESP_LOGI(TAG, "u8g2_SetFont");
+  // u8g2_SetFont(u8g2, u8g2_font_ncenB14_tr);
   ESP_LOGI(TAG, "u8g2_ClearBuffer");
   u8g2_ClearBuffer(u8g2);
+  u8g2_SendBuffer(u8g2);
+  ESP_LOGI(TAG, "u8g2_SetPowerSave");
+  u8g2_SetPowerSave(u8g2, 0); // wake up display
+  // Put before Clear Buffer if bug appears
 
   return u8g2;
 }
 
-void drawSprite(u8g2_t *u8g2, Sprite *sprite) {
-
-  ESP_LOGI(TAG, "Drawing sprite\n");
-
-  u8g2_DrawXBM(u8g2, 0, 0, sprite->width, sprite->height,
-               sprite->animations[sprite->currentFrame++]);
-  if (sprite->currentFrame > sprite->maxFrame)
-    sprite->currentFrame = 0;
-}
 void app_main(void) {
-  char *ourTaskName = pcTaskGetName(NULL);
-  ESP_LOGI(ourTaskName, "Hello,starting up!\n");
+  ESP_LOGI(TAG, "Hello,starting up!\n");
   u8g2_t *u8g2 = setup();
-  Sprite *pookie = newSprite(32, 32, 4, pookie_frame0, pookie_frame1,
-                             pookie_frame2, pookie_frame1);
-  if (pookie == NULL) {
-    ESP_LOGI(ourTaskName, "Sprite pointer is null, aborting...\n");
-    return;
-  }
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  Tama *tama = newTama();
+  setTamaSprites(tama, 1,
+                 newSprite(32, 32, 4, pookie_frame0, pookie_frame1,
+                           pookie_frame2, pookie_frame1));
 
   while (1) {
-
     ESP_LOGI(TAG, "u8g2_ClearBuffer");
     u8g2_ClearBuffer(u8g2);
-    drawSprite(u8g2, pookie);
+    drawSprite(u8g2, *tama->animations);
     ESP_LOGI(TAG, "u8g2_SendBuffer");
     u8g2_SendBuffer(u8g2);
     vTaskDelay(250 / portTICK_PERIOD_MS);
   }
+
   free(u8g2);
-  freeSprite(pookie);
+  freeTama(tama);
 }

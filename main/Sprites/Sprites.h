@@ -1,5 +1,7 @@
 #ifndef SPRITES
 #define SPRITES
+#include "esp_log.h"
+#include "u8g2.h"
 #include <malloc.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -23,9 +25,9 @@ Sprite *newSprite(u8 width, u8 height, int maxFrame, ...) {
   sprite->currentFrame = 0;
   sprite->maxFrame = maxFrame - 1;
   sprite->animations = (uint8_t **)malloc(maxFrame * sizeof(uint8_t *));
-  for (int counter = 0; counter < maxFrame; counter++) {
+  for (int counter = 0; counter < maxFrame; counter++)
     sprite->animations[counter] = va_arg(argptr, uint8_t *);
-  }
+
   va_end(argptr);
 
   return sprite;
@@ -35,5 +37,15 @@ void freeSprite(Sprite *sprite) {
   for (int i = 0; i < sprite->maxFrame + 1; i++)
     free(sprite->animations[i]);
   free(sprite);
+}
+
+void drawSprite(u8g2_t *u8g2, Sprite *sprite) {
+
+  ESP_LOGI("Sprites.h", "Drawing sprite\n");
+
+  u8g2_DrawXBM(u8g2, 0, 0, sprite->width, sprite->height,
+               sprite->animations[sprite->currentFrame++]);
+  if (sprite->currentFrame > sprite->maxFrame)
+    sprite->currentFrame = 0;
 }
 #endif
