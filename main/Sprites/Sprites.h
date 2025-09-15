@@ -39,11 +39,11 @@ void freeSprite(Sprite *sprite) {
   free(sprite);
 }
 
-void drawSprite(u8g2_t *u8g2, Sprite *sprite) {
+void drawSprite(u8g2_t *u8g2, Sprite *sprite, unsigned posX, unsigned posY) {
 
   ESP_LOGI("Sprites.h", "Drawing sprite\n");
 
-  u8g2_DrawXBM(u8g2, 0, 0, sprite->width, sprite->height,
+  u8g2_DrawXBM(u8g2, posX, -6, sprite->width, sprite->height,
                sprite->animations[sprite->currentFrame++]);
   if (sprite->currentFrame > sprite->maxFrame)
     sprite->currentFrame = 0;

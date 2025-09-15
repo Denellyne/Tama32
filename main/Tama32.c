@@ -60,9 +60,10 @@ void app_main(void) {
   while (1) {
     ESP_LOGI(TAG, "u8g2_ClearBuffer");
     u8g2_ClearBuffer(u8g2);
-    drawSprite(u8g2, *tama->animations);
+    drawSprite(u8g2, *tama->animations, tama->posX, tama->posY);
     ESP_LOGI(TAG, "u8g2_SendBuffer");
     u8g2_SendBuffer(u8g2);
+    updatePosition(tama);
     vTaskDelay(250 / portTICK_PERIOD_MS);
   }
 

@@ -11,19 +11,22 @@ enum states { idle = 0, evolve, hungry, poop, refuse };
 
 typedef struct {
 
-  u8 hunger, discipline, poop, age, happiness, numSprites;
+  u8 hunger, discipline, poop, age, happiness, numSprites, posX, posY;
+  bool direction;
   Sprite **animations;
 } Tama;
 
 Tama *newTama();
 void freeTama(Tama *tama);
+
 Tama *newTama() {
   Tama *tama = (Tama *)malloc(sizeof(Tama));
   if (tama == NULL)
     return NULL;
 
   tama->hunger = tama->discipline = tama->poop = tama->age = tama->happiness =
-      tama->numSprites = 0;
+      tama->numSprites = tama->posX = tama->direction = 0;
+  tama->posY = 16;
   return tama;
 }
 
@@ -68,6 +71,19 @@ void freeTama(Tama *tama) {
   for (int i = 0; i < tama->numSprites; i++)
     freeSprite(tama->animations[i]);
   free(tama);
+}
+void updatePosition(Tama *tama) {
+  if (tama->direction) {
+    if (tama->posX > 0)
+      tama->posX -= 2;
+    else
+      tama->direction = 0;
+  } else {
+    if (tama->posX < 96)
+      tama->posX += 2;
+    else
+      tama->direction = 1;
+  }
 }
 
 #endif // TAMA
