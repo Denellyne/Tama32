@@ -23,44 +23,44 @@ Game *newGame() {
   setTamaSprites(game->tama, 1,
                  newSprite(32, 32, 4, pookie_frame0, pookie_frame1,
                            pookie_frame2, pookie_frame1));
+
   return game;
 }
 void freeGame(Game *game) {
   freeTama(game->tama);
   free(game);
 }
-u8 getTimePassed() { return 2; }
+u8 getTimePassed() { return 3; }
 
 void playAnimation(u8g2_t *u8g2, int animation) {
   switch (animation) {
   case 0: // Death
-    u8g2_ClearBuffer(u8g2);
-    u8g2_SetDrawColor(u8g2, 0);
-    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
-    u8g2_SendBuffer(u8g2);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-
-    u8g2_ClearBuffer(u8g2);
-    u8g2_SetDrawColor(u8g2, 1);
-    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
-    u8g2_SendBuffer(u8g2);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-
-    u8g2_ClearBuffer(u8g2);
-    u8g2_SetDrawColor(u8g2, 0);
-    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
-    u8g2_SendBuffer(u8g2);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-
-    u8g2_ClearBuffer(u8g2);
-    u8g2_SetDrawColor(u8g2, 1);
-    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
-    u8g2_SendBuffer(u8g2);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
     break;
   case 1: // New Tama
-    break;
+    u8g2_ClearBuffer(u8g2);
+    u8g2_SetDrawColor(u8g2, 0);
+    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
+    u8g2_SendBuffer(u8g2);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
+    u8g2_ClearBuffer(u8g2);
+    u8g2_SetDrawColor(u8g2, 1);
+    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
+    u8g2_SendBuffer(u8g2);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+    u8g2_ClearBuffer(u8g2);
+    u8g2_SetDrawColor(u8g2, 0);
+    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
+    u8g2_SendBuffer(u8g2);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+    u8g2_ClearBuffer(u8g2);
+    u8g2_SetDrawColor(u8g2, 1);
+    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
+    u8g2_SendBuffer(u8g2);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    break;
   default:
     break;
   }
@@ -70,7 +70,10 @@ void updateGameState(Game *game, u8g2_t *u8g2) {
   u8 time = getTimePassed();
   game->hours += ((time >> 1) & 1);
 
-  ESP_LOGI("Game.h", "%d", game->hours);
+  ESP_LOGI("Game.h", "Happiness:%d ,Poop:%d ,Discipline:%d ,Hunger:%d",
+           game->tama->happiness, game->tama->poop, game->tama->discipline,
+           game->tama->hunger);
+
   bool tamaNeeds = (time & 1);
 
   updateTamaPosition(game->tama);

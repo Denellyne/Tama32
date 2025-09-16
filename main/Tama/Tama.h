@@ -1,7 +1,6 @@
 #ifndef TAMA
 #define TAMA
 
-#include "Sprites/Pookiee/Pookiee.h"
 #include "esp_log.h"
 #define YEAR_IN_HOURS 24
 // #define MAX_AGE 9
@@ -47,12 +46,8 @@ void setTamaSprites(Tama *tama, int numSprites, ...) {
 Tama *evolveTama(Tama *tama) {
   switch (tama->age) {
   case 1:
-    ESP_LOGI("Tama.h", "Tama died");
-    freeTama(tama);
-    return NULL;
     break;
     // Child
-
     break;
   case 4: // Teen
     break;
@@ -72,7 +67,24 @@ Tama *evolveTama(Tama *tama) {
   return tama;
 }
 
-void updateTamaNeeds(Tama *tama) {}
+void updateTamaNeeds(Tama *tama) {
+  int needs = rand();
+
+  tama->hunger =
+      (tama->hunger - (needs % 10) >= 0) * (tama->hunger - (needs % 10));
+  needs = needs >> 1;
+
+  tama->discipline = (tama->discipline - (needs % 10) >= 0) *
+                     (tama->discipline - (needs % 10));
+  needs = needs >> 1;
+
+  tama->poop = (tama->poop - (needs % 10) >= 0) * (tama->poop - (needs % 10));
+  needs = needs >> 1;
+
+  tama->happiness =
+      (tama->happiness - (needs % 10) >= 0) * (tama->happiness - (needs % 10));
+  needs = needs >> 1;
+}
 
 void freeTama(Tama *tama) {
 

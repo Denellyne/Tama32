@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-typedef unsigned short u8;
+typedef unsigned char u8;
 
 typedef struct {
   u8 width, height, maxFrame, currentFrame;
