@@ -34,8 +34,9 @@ Sprite *newSprite(u8 width, u8 height, int maxFrame, ...) {
 }
 
 void freeSprite(Sprite *sprite) {
-  for (int i = 0; i < sprite->maxFrame + 1; i++)
-    free(sprite->animations[i]);
+  // for (int i = 0; i <= sprite->maxFrame; i++)
+  //   free(sprite->animations[i]);
+  free(sprite->animations);
   free(sprite);
 }
 

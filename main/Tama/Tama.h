@@ -1,9 +1,10 @@
 #ifndef TAMA
 #define TAMA
 
+#include "Sprites/Pookiee/Pookiee.h"
 #include "esp_log.h"
 #define YEAR_IN_HOURS 24
-#define MAX_AGE 9
+// #define MAX_AGE 9
 
 #include "../Sprites/Sprites.h"
 #include <stdarg.h>
@@ -13,7 +14,7 @@ typedef struct {
 
   u8 hunger, discipline, poop, age, happiness, numSprites, posX, posY;
   bool direction;
-  Sprite **animations;
+  Sprite **sprites;
 } Tama;
 
 Tama *newTama();
@@ -37,7 +38,7 @@ void setTamaSprites(Tama *tama, int numSprites, ...) {
 
   ESP_LOGI("Tama.h", "Setting Tama animations");
   for (int counter = 0; counter < numSprites; counter++)
-    tama->animations[counter] = va_arg(argptr, Sprite *);
+    tama->sprites[counter] = va_arg(argptr, Sprite *);
 
   ESP_LOGI("Tama.h", "Tama animations set");
   va_end(argptr);
@@ -46,6 +47,10 @@ void setTamaSprites(Tama *tama, int numSprites, ...) {
 Tama *evolveTama(Tama *tama) {
   switch (tama->age) {
   case 1:
+    ESP_LOGI("Tama.h", "Tama died");
+    freeTama(tama);
+    return NULL;
+    break;
     // Child
 
     break;
@@ -56,8 +61,9 @@ Tama *evolveTama(Tama *tama) {
   case 12: // Elder
     break;
   case 14: // Dead
+    ESP_LOGI("Tama.h", "Tama died");
     freeTama(tama);
-    return newTama();
+    return NULL;
     break;
   default:
     return tama;
@@ -66,13 +72,15 @@ Tama *evolveTama(Tama *tama) {
   return tama;
 }
 
+void updateTamaNeeds(Tama *tama) {}
+
 void freeTama(Tama *tama) {
 
   for (int i = 0; i < tama->numSprites; i++)
-    freeSprite(tama->animations[i]);
+    freeSprite(tama->sprites[i]);
   free(tama);
 }
-void updatePosition(Tama *tama) {
+void updateTamaPosition(Tama *tama) {
   if (tama->direction) {
     if (tama->posX > 0)
       tama->posX -= 2;

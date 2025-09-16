@@ -1,6 +1,4 @@
-#include "Sprites/Pookiee/Pookiee.h"
-#include "Sprites/Sprites.h"
-#include "Tama/Tama.h"
+#include "Game/Game.h"
 #include "u8g2_esp32_hal.h"
 #include <driver/gpio.h>
 #include <driver/spi_master.h>
@@ -52,21 +50,17 @@ u8g2_t *setup() {
 void app_main(void) {
   ESP_LOGI(TAG, "Hello,starting up!\n");
   u8g2_t *u8g2 = setup();
-  Tama *tama = newTama();
-  setTamaSprites(tama, 1,
-                 newSprite(32, 32, 4, pookie_frame0, pookie_frame1,
-                           pookie_frame2, pookie_frame1));
+  Game *game = newGame();
 
   while (1) {
     ESP_LOGI(TAG, "u8g2_ClearBuffer");
     u8g2_ClearBuffer(u8g2);
-    drawSprite(u8g2, *tama->animations, tama->posX, tama->posY);
     ESP_LOGI(TAG, "u8g2_SendBuffer");
+    updateGameState(game, u8g2);
     u8g2_SendBuffer(u8g2);
-    updatePosition(tama);
     vTaskDelay(250 / portTICK_PERIOD_MS);
   }
 
   free(u8g2);
-  freeTama(tama);
+  freeGame(game);
 }
