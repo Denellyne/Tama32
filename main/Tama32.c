@@ -14,6 +14,8 @@
 // SCL - GPIO22
 #define PIN_SCL 22
 
+#define YEAR_IN_HOURS 24
+
 static const char *TAG = "Tama32";
 
 u8g2_t *setup() {

@@ -1,6 +1,12 @@
 #ifndef GAME
 #define GAME
 
+#define U8G2_HEIGHT 64
+#define U8G2_WIDTH 128
+enum cutscene {
+  deathCS = 0,
+  newTamaCS,
+};
 #include "../Tama/Tama.h"
 #include "Sprites/Pookiee/Pookiee.h"
 #include "freertos/idf_additions.h"
@@ -21,8 +27,8 @@ Game *newGame() {
   game->hours = 0;
   game->tama = newTama();
   setTamaSprites(game->tama, 1,
-                 newSprite(32, 32, 4, pookie_frame0, pookie_frame1,
-                           pookie_frame2, pookie_frame1));
+                 newSprite(SPRITE_HEIGHT, SPRITE_WIDTH, 4, pookie_frame0,
+                           pookie_frame1, pookie_frame2, pookie_frame1));
 
   return game;
 }
@@ -34,30 +40,36 @@ u8 getTimePassed() { return 3; }
 
 void playAnimation(u8g2_t *u8g2, int animation) {
   switch (animation) {
-  case 0: // Death
+  case deathCS: // Death
+    u8g2_ClearBuffer(u8g2);
+    u8g2_SetDrawColor(u8g2, 0);
+    // u8g2_DrawXBM(u8g2,32,64, 32, 32, );
+    u8g2_SendBuffer(u8g2);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
     break;
-  case 1: // New Tama
+  case newTamaCS: // New Tama
     u8g2_ClearBuffer(u8g2);
     u8g2_SetDrawColor(u8g2, 0);
-    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
+    u8g2_DrawBox(u8g2, 0, 0, U8G2_WIDTH, U8G2_HEIGHT);
     u8g2_SendBuffer(u8g2);
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
     u8g2_ClearBuffer(u8g2);
     u8g2_SetDrawColor(u8g2, 1);
-    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
+    u8g2_DrawBox(u8g2, 0, 0, U8G2_WIDTH, U8G2_HEIGHT);
     u8g2_SendBuffer(u8g2);
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
     u8g2_ClearBuffer(u8g2);
     u8g2_SetDrawColor(u8g2, 0);
-    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
+    u8g2_DrawBox(u8g2, 0, 0, U8G2_WIDTH, U8G2_HEIGHT);
     u8g2_SendBuffer(u8g2);
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
     u8g2_ClearBuffer(u8g2);
     u8g2_SetDrawColor(u8g2, 1);
-    u8g2_DrawBox(u8g2, 0, 0, 128, 64);
+    u8g2_DrawBox(u8g2, 0, 0, U8G2_WIDTH, U8G2_HEIGHT);
     u8g2_SendBuffer(u8g2);
     vTaskDelay(100 / portTICK_PERIOD_MS);
     break;
@@ -84,6 +96,10 @@ void updateGameState(Game *game, u8g2_t *u8g2) {
   if (game->hours >= 24) {
     game->hours = 0;
     game->tama->age++;
+
+    if (game->tama->sick)
+      game->tama->daysSick++;
+
     game->tama = evolveTama(game->tama);
   }
 

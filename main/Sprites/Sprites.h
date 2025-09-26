@@ -8,6 +8,8 @@
 
 typedef unsigned char u8;
 
+#define SPRITE_HEIGHT 32
+#define SPRITE_WIDTH 32
 typedef struct {
   u8 width, height, maxFrame, currentFrame;
   uint8_t **animations;

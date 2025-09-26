@@ -2,17 +2,29 @@
 #define TAMA
 
 #include "esp_log.h"
-#define YEAR_IN_HOURS 24
 // #define MAX_AGE 9
 
 #include "../Sprites/Sprites.h"
 #include <stdarg.h>
 enum states { idle = 0, evolve, hungry, poop, refuse };
 
+#define TAMA_EGG 0
+#define TAMA_CHILD 1
+#define TAMA_TEEN 4
+#define TAMA_ADULT 8
+#define TAMA_ELDER 12
+#define TAMA_DEAD 14
+
+#define TAMA_MAX_SICK_DAYS 3
+#define TAMA_DIRTY 210
+#define TAMA_UNDERWEIGHT 3
+#define TAMA_OVERWEIGHT 30
+
 typedef struct {
 
-  u8 hunger, discipline, poop, age, happiness, numSprites, posX, posY;
-  bool direction;
+  u8 hunger, weight, discipline, poop, age, happiness, daysSick, numSprites,
+      posX, posY;
+  bool direction, badEvolve, sick;
   Sprite **sprites;
 } Tama;
 
@@ -24,13 +36,18 @@ Tama *newTama() {
   if (tama == NULL)
     return NULL;
 
-  tama->hunger = tama->discipline = tama->poop = tama->age = tama->happiness =
-      tama->numSprites = tama->posX = tama->direction = 0;
+  tama->hunger = tama->weight = tama->discipline = tama->poop = tama->daysSick =
+      tama->age = tama->happiness = tama->numSprites = tama->posX =
+          tama->direction = tama->badEvolve = tama->sick = 0;
   tama->posY = 16;
   return tama;
 }
 
 void setTamaSprites(Tama *tama, int numSprites, ...) {
+
+  for (int i = 0; i < tama->numSprites; i++)
+    freeSprite(tama->sprites[i]);
+
   tama->numSprites = numSprites;
   va_list argptr;
   va_start(argptr, numSprites);
@@ -44,21 +61,29 @@ void setTamaSprites(Tama *tama, int numSprites, ...) {
 }
 
 Tama *evolveTama(Tama *tama) {
-  switch (tama->age) {
-  case 1:
-    break;
-    // Child
-    break;
-  case 4: // Teen
-    break;
-  case 8: // Adult
-    break;
-  case 12: // Elder
-    break;
-  case 14: // Dead
+  if (tama->age >= TAMA_DEAD || tama->daysSick >= TAMA_MAX_SICK_DAYS) {
     ESP_LOGI("Tama.h", "Tama died");
     freeTama(tama);
     return NULL;
+  }
+
+  if (tama->badEvolve)
+    return tama;
+
+  if (tama->poop >= TAMA_DIRTY) {
+  }
+  if (tama->weight >= TAMA_OVERWEIGHT) {
+  }
+  if (tama->weight >= TAMA_UNDERWEIGHT) {
+  }
+  switch (tama->age) {
+  case TAMA_CHILD:
+    break;
+  case TAMA_TEEN: // Teen
+    break;
+  case TAMA_ADULT: // Adult
+    break;
+  case TAMA_ELDER: // Elder
     break;
   default:
     return tama;
@@ -71,19 +96,26 @@ void updateTamaNeeds(Tama *tama) {
   int needs = rand();
 
   tama->hunger =
-      (tama->hunger - (needs % 10) >= 0) * (tama->hunger - (needs % 10));
-  needs = needs >> 1;
+      (tama->hunger + (needs % 10) <= 255) * (tama->hunger + (needs % 10)) +
+      (tama->hunger + (needs % 10) > 255) * 255;
+  needs >>= 1;
 
   tama->discipline = (tama->discipline - (needs % 10) >= 0) *
                      (tama->discipline - (needs % 10));
-  needs = needs >> 1;
+  needs >>= 1;
 
-  tama->poop = (tama->poop - (needs % 10) >= 0) * (tama->poop - (needs % 10));
-  needs = needs >> 1;
+  tama->poop =
+      (tama->poop + (needs % 10) <= 255) * (tama->poop + (needs % 10)) +
+      (tama->poop + (needs % 10) > 255) * 255;
+  needs >>= 1;
 
   tama->happiness =
       (tama->happiness - (needs % 10) >= 0) * (tama->happiness - (needs % 10));
-  needs = needs >> 1;
+  needs >>= 1;
+
+  int sickness = rand() % 255;
+  if (sickness <= (1 + (tama->poop >> 2)))
+    tama->sick = true;
 }
 
 void freeTama(Tama *tama) {
