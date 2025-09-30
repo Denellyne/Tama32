@@ -36,9 +36,31 @@ Tama *newTama() {
   if (tama == NULL)
     return NULL;
 
-  tama->hunger = tama->weight = tama->discipline = tama->poop = tama->daysSick =
-      tama->age = tama->happiness = tama->numSprites = tama->posX =
-          tama->direction = tama->badEvolve = tama->sick = 0;
+  tama->hunger = 90;
+  tama->weight = 3;
+  tama->happiness = 50;
+
+  tama->discipline = tama->poop = tama->daysSick = tama->age =
+      tama->numSprites = tama->posX = tama->direction = tama->badEvolve =
+          tama->sick = 0;
+  tama->posY = 16;
+  return tama;
+}
+Tama *newTamaEX(u8 hunger, u8 weight, u8 happiness, u8 discipline, u8 poop,
+                u8 daysSick, u8 age, bool badEvolve, bool sick) {
+  Tama *tama = (Tama *)malloc(sizeof(Tama));
+  if (tama == NULL)
+    return NULL;
+  tama->sick = sick;
+  tama->badEvolve = badEvolve;
+  tama->age = age;
+  tama->daysSick = daysSick;
+  tama->discipline = discipline;
+  tama->poop = poop;
+  tama->happiness = happiness;
+  tama->hunger = hunger;
+  tama->weight = weight;
+  tama->posX = tama->numSprites = tama->direction = 0;
   tama->posY = 16;
   return tama;
 }
@@ -93,6 +115,8 @@ Tama *evolveTama(Tama *tama) {
 }
 
 void updateTamaNeeds(Tama *tama) {
+  if (tama->age < 1)
+    return;
   int needs = rand();
 
   tama->hunger =

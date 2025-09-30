@@ -3,10 +3,8 @@
 
 #define U8G2_HEIGHT 64
 #define U8G2_WIDTH 128
-enum cutscene {
-  deathCS = 0,
-  newTamaCS,
-};
+#define DEATH_TAMA 0
+#define NEW_TAMA 1
 #include "../Tama/Tama.h"
 #include "Sprites/Pookiee/Pookiee.h"
 #include "freertos/idf_additions.h"
@@ -40,7 +38,7 @@ u8 getTimePassed() { return 3; }
 
 void playAnimation(u8g2_t *u8g2, int animation) {
   switch (animation) {
-  case deathCS: // Death
+  case DEATH_TAMA: // Death
     u8g2_ClearBuffer(u8g2);
     u8g2_SetDrawColor(u8g2, 0);
     // u8g2_DrawXBM(u8g2,32,64, 32, 32, );
@@ -48,7 +46,7 @@ void playAnimation(u8g2_t *u8g2, int animation) {
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
     break;
-  case newTamaCS: // New Tama
+  case NEW_TAMA: // New Tama
     u8g2_ClearBuffer(u8g2);
     u8g2_SetDrawColor(u8g2, 0);
     u8g2_DrawBox(u8g2, 0, 0, U8G2_WIDTH, U8G2_HEIGHT);
@@ -108,7 +106,7 @@ void updateGameState(Game *game, u8g2_t *u8g2) {
     setTamaSprites(game->tama, 1,
                    newSprite(32, 32, 4, pookie_frame0, pookie_frame1,
                              pookie_frame2, pookie_frame1));
-    playAnimation(u8g2, 0);
+    playAnimation(u8g2, NEW_TAMA);
     u8g2_ClearBuffer(u8g2);
   }
 
