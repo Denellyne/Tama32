@@ -1,2 +1,4 @@
 CompileFlags:
-  CompilationDatabase: build/
+  CompilationDatabase: build
+  Add: -Wno-unknown-warning-option
+  Remove: [-m*, -f*]

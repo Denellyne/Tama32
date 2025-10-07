@@ -107,6 +107,7 @@ void updateGameState(Game *game, u8g2_t *u8g2) {
                    newSprite(32, 32, 4, pookie_frame0, pookie_frame1,
                              pookie_frame2, pookie_frame1));
     playAnimation(u8g2, NEW_TAMA);
+
     u8g2_ClearBuffer(u8g2);
   }
 
