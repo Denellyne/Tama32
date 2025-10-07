@@ -42,3 +42,4 @@
 
 build/
 .cache/
+main/Sprites/spritesData.h

@@ -25,7 +25,7 @@ Game *newGame() {
   game->hours = 0;
   game->tama = newTama();
   setTamaSprites(game->tama, 1,
-                 newSprite(SPRITEHEIGHT, SPRITEWIDTH, 4, pookie0, pookie1,
+                 newSprite(SPRITE_HEIGHT, SPRITE_WIDTH, 4, pookie0, pookie1,
                            pookie2, pookie1));
 
   return game;
