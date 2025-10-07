@@ -4,3 +4,6 @@
 [submodule "components/u8g2"]
 	path = components/u8g2
 	url = https://github.com/olikraus/u8g2
+[submodule "main/Tools/PEmbed"]
+	path = main/Tools/PEmbed
+	url = git@github.com:Denellyne/PEmbed.git

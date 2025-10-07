@@ -5,8 +5,8 @@
 #define U8G2_WIDTH 128
 #define DEATH_TAMA 0
 #define NEW_TAMA 1
+#include "../Sprites/spritesData.h"
 #include "../Tama/Tama.h"
-#include "Sprites/Pookiee/Pookiee.h"
 #include "freertos/idf_additions.h"
 #include "u8g2.h"
 #include <stdlib.h>
@@ -25,8 +25,8 @@ Game *newGame() {
   game->hours = 0;
   game->tama = newTama();
   setTamaSprites(game->tama, 1,
-                 newSprite(SPRITE_HEIGHT, SPRITE_WIDTH, 4, pookie_frame0,
-                           pookie_frame1, pookie_frame2, pookie_frame1));
+                 newSprite(SPRITEHEIGHT, SPRITEWIDTH, 4, pookie0, pookie1,
+                           pookie2, pookie1));
 
   return game;
 }
@@ -104,8 +104,7 @@ void updateGameState(Game *game, u8g2_t *u8g2) {
   if (game->tama == NULL) {
     game->tama = newTama();
     setTamaSprites(game->tama, 1,
-                   newSprite(32, 32, 4, pookie_frame0, pookie_frame1,
-                             pookie_frame2, pookie_frame1));
+                   newSprite(32, 32, 4, pookie0, pookie1, pookie2, pookie1));
     playAnimation(u8g2, NEW_TAMA);
 
     u8g2_ClearBuffer(u8g2);
