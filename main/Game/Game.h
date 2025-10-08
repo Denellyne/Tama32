@@ -30,6 +30,7 @@ Game *newGame() {
 
   return game;
 }
+
 void freeGame(Game *game) {
   freeTama(game->tama);
   free(game);

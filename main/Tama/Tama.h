@@ -2,7 +2,6 @@
 #define TAMA
 
 #include "esp_log.h"
-// #define MAX_AGE 9
 
 #include "../Sprites/Sprites.h"
 #include <stdarg.h>
@@ -99,14 +98,22 @@ Tama *evolveTama(Tama *tama) {
   if (tama->weight >= TAMA_UNDERWEIGHT) {
   }
   switch (tama->age) {
-  case TAMA_CHILD:
-    break;
-  case TAMA_TEEN: // Teen
-    break;
+  case TAMA_CHILD: {
+    Tama *evolved = newTamaEX(150, 4, 20, 20, 0, 0, tama->age, 0, 0);
+    freeTama(tama);
+    return evolved;
+  } break;
+  case TAMA_TEEN:  // Teen
   case TAMA_ADULT: // Adult
-    break;
   case TAMA_ELDER: // Elder
-    break;
+  {
+
+    Tama *evolved = newTamaEX(tama->hunger, tama->weight, tama->happiness,
+                              tama->discipline, tama->poop, tama->daysSick,
+                              tama->age, tama->badEvolve, tama->sick);
+    freeTama(tama);
+    return evolved;
+  } break;
   default:
     return tama;
     break;
