@@ -1,6 +1,7 @@
 #ifndef TAMA
 #define TAMA
 
+#include "Sprites/spritesData.h"
 #include "esp_log.h"
 
 #include "../Sprites/Sprites.h"
@@ -82,25 +83,47 @@ void setTamaSprites(Tama *tama, int numSprites, ...) {
 }
 
 Tama *evolveTama(Tama *tama) {
-  if (tama->age >= TAMA_DEAD || tama->daysSick >= TAMA_MAX_SICK_DAYS) {
+  if (tama->age >= TAMA_DEAD || tama->daysSick >= TAMA_MAX_SICK_DAYS ||
+      tama->hunger >= 255) {
     ESP_LOGI("Tama.h", "Tama died");
     freeTama(tama);
-    return NULL;
+
+    tama = newTama();
+    if (!tama)
+      return NULL;
+
+    Sprite *sprite = newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 4, pookie0, pookie1,
+                               pookie2, pookie1);
+    if (!sprite) {
+      freeTama(tama);
+      return NULL;
+    }
+    setTamaSprites(tama, 1, sprite);
+    return tama;
   }
 
   if (tama->badEvolve)
     return tama;
 
   if (tama->poop >= TAMA_DIRTY) {
-  }
-  if (tama->weight >= TAMA_OVERWEIGHT) {
-  }
-  if (tama->weight >= TAMA_UNDERWEIGHT) {
+  } else if (tama->weight >= TAMA_OVERWEIGHT) {
+  } else if (tama->weight >= TAMA_UNDERWEIGHT) {
   }
   switch (tama->age) {
   case TAMA_CHILD: {
     Tama *evolved = newTamaEX(150, 4, 20, 20, 0, 0, tama->age, 0, 0);
     freeTama(tama);
+    Sprite *sprite = NULL;
+    int numSprites = 0;
+    switch (rand() % 3) {
+    case 1:
+      break;
+    case 2:
+      break;
+    default:
+      break;
+    }
+    setTamaSprites(evolved, numSprites, sprite);
     return evolved;
   } break;
   case TAMA_TEEN:  // Teen

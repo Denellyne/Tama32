@@ -1,6 +1,7 @@
 #ifndef GAME
 #define GAME
 
+#include "Sprites/Sprites.h"
 #define U8G2_HEIGHT 64
 #define U8G2_WIDTH 128
 #define DEATH_TAMA 0
@@ -22,11 +23,25 @@ Game *newGame() {
   ESP_LOGI("Game.h", "Starting the game");
 
   Game *game = (Game *)malloc(sizeof(Game));
+  if (!game) {
+    ESP_LOGI("Game.h", "Unable to malloc game pointer");
+    return NULL;
+  }
   game->hours = 0;
   game->tama = newTama();
-  setTamaSprites(game->tama, 1,
-                 newSprite(SPRITE_HEIGHT, SPRITE_WIDTH, 4, pookie0, pookie1,
-                           pookie2, pookie1));
+  if (!game->tama) {
+    free(game);
+    return NULL;
+  }
+
+  Sprite *sprite = newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 4, pookie0, pookie1,
+                             pookie2, pookie1);
+  if (!sprite) {
+    freeTama(game->tama);
+    free(game);
+    return NULL;
+  }
+  setTamaSprites(game->tama, 1, sprite);
 
   return game;
 }
@@ -76,7 +91,7 @@ void playAnimation(u8g2_t *u8g2, int animation) {
     break;
   }
 }
-void updateGameState(Game *game, u8g2_t *u8g2) {
+int updateGameState(Game *game, u8g2_t *u8g2) {
   ESP_LOGI("Game.h", "Updating game state");
   u8 time = getTimePassed();
   game->hours += ((time >> 1) & 1);
@@ -100,18 +115,18 @@ void updateGameState(Game *game, u8g2_t *u8g2) {
       game->tama->daysSick++;
 
     game->tama = evolveTama(game->tama);
-  }
-
-  if (game->tama == NULL) {
-    game->tama = newTama();
-    setTamaSprites(game->tama, 1,
-                   newSprite(32, 32, 4, pookie0, pookie1, pookie2, pookie1));
-    playAnimation(u8g2, NEW_TAMA);
-
-    u8g2_ClearBuffer(u8g2);
+    if (!game->tama) {
+      ESP_LOGI("Game.h", "Tama is null after calling evolveTama");
+      return 0;
+    }
+    if (game->tama->age == 0) {
+      playAnimation(u8g2, NEW_TAMA);
+      u8g2_ClearBuffer(u8g2);
+    }
   }
 
   drawSprite(u8g2, *game->tama->sprites, game->tama->posX, game->tama->posY);
+  return 1;
 }
 
 #endif

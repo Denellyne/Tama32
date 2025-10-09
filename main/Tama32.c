@@ -53,12 +53,21 @@ void app_main(void) {
   ESP_LOGI(TAG, "Hello,starting up!\n");
   u8g2_t *u8g2 = setup();
   Game *game = newGame();
+  if (!game) {
+    ESP_LOGI(TAG, "Unable to start game");
+    return;
+  }
 
   while (1) {
     ESP_LOGI(TAG, "u8g2_ClearBuffer");
     u8g2_ClearBuffer(u8g2);
     ESP_LOGI(TAG, "u8g2_SendBuffer");
-    updateGameState(game, u8g2);
+    if (!updateGameState(game, u8g2)) {
+      ESP_LOGI(TAG, "An error occured while updating state, resetting...");
+      free(u8g2);
+      freeGame(game);
+      return;
+    }
     u8g2_SendBuffer(u8g2);
     vTaskDelay(250 / portTICK_PERIOD_MS);
   }
