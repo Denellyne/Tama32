@@ -6,6 +6,7 @@
 #define U8G2_WIDTH 128
 #define DEATH_TAMA 0
 #define NEW_TAMA 1
+#define EVOLVE_TAMA 2
 #include "../Sprites/spritesData.h"
 #include "../Tama/Tama.h"
 #include "freertos/idf_additions.h"
@@ -34,8 +35,8 @@ Game *newGame() {
     return NULL;
   }
 
-  Sprite *sprite = newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 4, pookie0, pookie1,
-                             pookie2, pookie1);
+  Sprite *sprite =
+      newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 4, egg0, egg1, egg2, egg3);
   if (!sprite) {
     freeTama(game->tama);
     free(game);
@@ -52,7 +53,7 @@ void freeGame(Game *game) {
 }
 u8 getTimePassed() { return 3; }
 
-void playAnimation(u8g2_t *u8g2, int animation) {
+void playAnimation(u8g2_t *u8g2, int animation, Tama *tama) {
   switch (animation) {
   case DEATH_TAMA: // Death
     u8g2_ClearBuffer(u8g2);
@@ -87,6 +88,15 @@ void playAnimation(u8g2_t *u8g2, int animation) {
     u8g2_SendBuffer(u8g2);
     vTaskDelay(100 / portTICK_PERIOD_MS);
     break;
+  case EVOLVE_TAMA:
+    for (int i = 0; i <= tama->sprites[tama->currentSprite]->maxFrame; i++) {
+      u8g2_ClearBuffer(u8g2);
+      drawSprite(u8g2, tama->sprites[tama->currentSprite], tama->posX,
+                 tama->posY);
+      u8g2_SendBuffer(u8g2);
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+    break;
   default:
     break;
   }
@@ -110,6 +120,11 @@ int updateGameState(Game *game, u8g2_t *u8g2) {
   if (game->hours >= 24) {
     game->hours = 0;
     game->tama->age++;
+    if (game->tama->age == 1) {
+      game->tama->currentSprite = evolve;
+      playAnimation(u8g2, EVOLVE_TAMA, game->tama);
+      u8g2_ClearBuffer(u8g2);
+    }
 
     if (game->tama->sick)
       game->tama->daysSick++;
@@ -120,12 +135,13 @@ int updateGameState(Game *game, u8g2_t *u8g2) {
       return 0;
     }
     if (game->tama->age == 0) {
-      playAnimation(u8g2, NEW_TAMA);
+      playAnimation(u8g2, NEW_TAMA, NULL);
       u8g2_ClearBuffer(u8g2);
     }
   }
 
-  drawSprite(u8g2, *game->tama->sprites, game->tama->posX, game->tama->posY);
+  drawSprite(u8g2, game->tama->sprites[game->tama->currentSprite],
+             game->tama->posX, game->tama->posY);
   return 1;
 }
 

@@ -20,10 +20,15 @@ enum states { idle = 0, evolve, hungry, poop, refuse };
 #define TAMA_UNDERWEIGHT 3
 #define TAMA_OVERWEIGHT 30
 
+#define TAMA_CHILD_HUNGER 150
+#define TAMA_CHILD_WEIGHT 4
+#define TAMA_CHILD_HAPPINESS 20
+#define TAMA_CHILD_DISCIPLINE 20
+
 typedef struct {
 
   u8 hunger, weight, discipline, poop, age, happiness, daysSick, numSprites,
-      posX, posY;
+      posX, posY, currentSprite;
   bool direction, badEvolve, sick;
   Sprite **sprites;
 } Tama;
@@ -36,13 +41,10 @@ Tama *newTama() {
   if (tama == NULL)
     return NULL;
 
-  tama->hunger = 90;
-  tama->weight = 3;
-  tama->happiness = 50;
-
-  tama->discipline = tama->poop = tama->daysSick = tama->age =
-      tama->numSprites = tama->posX = tama->direction = tama->badEvolve =
-          tama->sick = 0;
+  tama->hunger = tama->weight = tama->happiness = tama->discipline =
+      tama->poop = tama->daysSick = tama->age = tama->numSprites = tama->posX =
+          tama->currentSprite = tama->direction = tama->badEvolve = tama->sick =
+              0;
   tama->posY = 16;
   return tama;
 }
@@ -60,7 +62,7 @@ Tama *newTamaEX(u8 hunger, u8 weight, u8 happiness, u8 discipline, u8 poop,
   tama->happiness = happiness;
   tama->hunger = hunger;
   tama->weight = weight;
-  tama->posX = tama->numSprites = tama->direction = 0;
+  tama->posX = tama->numSprites = tama->currentSprite = tama->direction = 0;
   tama->posY = 16;
   return tama;
 }
@@ -92,13 +94,17 @@ Tama *evolveTama(Tama *tama) {
     if (!tama)
       return NULL;
 
-    Sprite *sprite = newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 4, pookie0, pookie1,
-                               pookie2, pookie1);
-    if (!sprite) {
+    Sprite *eggIdle =
+        newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 4, egg0, egg1, egg2, egg3);
+    Sprite *eggHatching =
+        newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 13, egg4, egg5, egg6, egg7, egg8,
+                  egg9, egg10, egg11, egg12, egg13, egg14, egg15, egg16);
+    int numSprites = 2;
+    if (!eggIdle || !eggHatching) {
       freeTama(tama);
       return NULL;
     }
-    setTamaSprites(tama, 1, sprite);
+    setTamaSprites(tama, numSprites, eggIdle, eggHatching);
     return tama;
   }
 
@@ -111,30 +117,80 @@ Tama *evolveTama(Tama *tama) {
   }
   switch (tama->age) {
   case TAMA_CHILD: {
-    Tama *evolved = newTamaEX(150, 4, 20, 20, 0, 0, tama->age, 0, 0);
+    Tama *evolved =
+        newTamaEX(TAMA_CHILD_HUNGER, TAMA_CHILD_WEIGHT, TAMA_CHILD_HAPPINESS,
+                  TAMA_CHILD_DISCIPLINE, 0, 0, tama->age, 0, 0);
     freeTama(tama);
     Sprite *sprite = NULL;
     int numSprites = 0;
     switch (rand() % 3) {
     case 1:
+      sprite = newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 4, child0, child1, child2,
+                         child1);
+      numSprites = 1;
       break;
     case 2:
+      sprite = newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 4, child0, child1, child2,
+                         child1);
+      numSprites = 1;
       break;
     default:
+      sprite = newSprite(SPRITE_WIDTH, SPRITE_HEIGHT, 4, child0, child1, child2,
+                         child1);
+      numSprites = 1;
       break;
+    }
+    if (!sprite) {
+      freeTama(tama);
+      return NULL;
     }
     setTamaSprites(evolved, numSprites, sprite);
     return evolved;
   } break;
-  case TAMA_TEEN:  // Teen
-  case TAMA_ADULT: // Adult
-  case TAMA_ELDER: // Elder
+  case TAMA_TEEN: // Teen
   {
-
+    Sprite *sprite = NULL;
+    int numSprites = 0;
+    if (!sprite) {
+      freeTama(tama);
+      return NULL;
+    }
     Tama *evolved = newTamaEX(tama->hunger, tama->weight, tama->happiness,
                               tama->discipline, tama->poop, tama->daysSick,
                               tama->age, tama->badEvolve, tama->sick);
     freeTama(tama);
+    setTamaSprites(evolved, numSprites, sprite);
+    return evolved;
+  } break;
+  case TAMA_ADULT: // Adult
+  {
+    Sprite *sprite = NULL;
+    int numSprites = 0;
+    if (!sprite) {
+      freeTama(tama);
+      return NULL;
+    }
+    Tama *evolved = newTamaEX(tama->hunger, tama->weight, tama->happiness,
+                              tama->discipline, tama->poop, tama->daysSick,
+                              tama->age, tama->badEvolve, tama->sick);
+    freeTama(tama);
+    setTamaSprites(evolved, numSprites, sprite);
+    return evolved;
+  } break;
+  case TAMA_ELDER: // Elder
+  {
+
+    Sprite *sprite = NULL;
+    int numSprites = 0;
+    if (!sprite) {
+      freeTama(tama);
+      return NULL;
+    }
+    Tama *evolved = newTamaEX(tama->hunger, tama->weight, tama->happiness,
+                              tama->discipline, tama->poop, tama->daysSick,
+                              tama->age, tama->badEvolve, tama->sick);
+    freeTama(tama);
+    setTamaSprites(evolved, numSprites, sprite);
     return evolved;
   } break;
   default:
@@ -147,6 +203,7 @@ Tama *evolveTama(Tama *tama) {
 void updateTamaNeeds(Tama *tama) {
   if (tama->age < 1)
     return;
+
   int needs = rand();
 
   tama->hunger =
@@ -179,6 +236,9 @@ void freeTama(Tama *tama) {
   free(tama);
 }
 void updateTamaPosition(Tama *tama) {
+  if (tama->age < 1)
+    return;
+
   if (tama->direction) {
     if (tama->posX > 0)
       tama->posX -= 2;
